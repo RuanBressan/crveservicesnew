@@ -7,10 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface FuncionarioRepository extends JpaRepository<FuncionarioModel, Integer> {
-    Optional<FuncionarioModel> findById(int id);
+public interface FuncionarioRepository extends JpaRepository<FuncionarioModel, Long> {
+    Optional<FuncionarioModel> findById(long id);
 
-    Optional<FuncionarioModel> findAllById(int id);
+    Optional<FuncionarioModel> findAllById(long id);
 
 
 
