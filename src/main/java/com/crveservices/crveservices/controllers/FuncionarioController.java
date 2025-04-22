@@ -11,8 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -21,6 +20,40 @@ public class FuncionarioController {
 
     @Autowired
     FuncionarioRepository funcionarioRepository;
+
+
+    @PostMapping("/login")
+    public ResponseEntity<Object> loginFuncionario(@RequestBody Map<String, String> credentials) {
+        String nmFuncionario = credentials.get("nmFuncionario");
+        String dsSenha = credentials.get("dsSenha");
+
+        if (nmFuncionario == null || dsSenha == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Nome de usuário e senha são obrigatórios"));
+        }
+
+        Optional<FuncionarioModel> funcionario = funcionarioRepository.findByNmFuncionario(nmFuncionario);
+
+        if (funcionario.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Usuário não encontrado"));
+        }
+
+        if (!funcionario.get().getDsSenha().equals(dsSenha)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Senha incorreta"));
+        }
+
+        String token = UUID.randomUUID().toString();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("funcionario", funcionario.get());
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
     @PostMapping
     public ResponseEntity<FuncionarioModel> saveFuncionario(@RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto) {

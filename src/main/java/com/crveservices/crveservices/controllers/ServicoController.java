@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/servico")
 public class ServicoController {
 
-
     @Autowired
     ServicoRepository servicoRepository;
 
@@ -33,6 +32,7 @@ public class ServicoController {
     @Autowired
     ProdutoRepository produtoRepository;
 
+    // Endpoint para obter um serviço específico pelo ID
     @GetMapping("/{id}")
     public ResponseEntity<Object> getServico(@PathVariable Long id) {
         Optional<ServicoModel> servicoOpt = servicoRepository.findById(id);
@@ -78,6 +78,13 @@ public class ServicoController {
         return ResponseEntity.status(HttpStatus.OK).body("Serviço excluído com sucesso!");
     }
 
-
-
+    @GetMapping
+    public ResponseEntity<Object> getAllServicos() {
+        List<ServicoModel> servicos = servicoRepository.findAll();
+        if (servicos.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Nenhum serviço encontrado");
+        }
+        return ResponseEntity.ok(servicos);
+    }
 }
+

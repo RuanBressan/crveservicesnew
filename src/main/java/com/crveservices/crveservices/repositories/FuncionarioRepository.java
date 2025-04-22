@@ -12,6 +12,8 @@ public interface FuncionarioRepository extends JpaRepository<FuncionarioModel, L
 
     Optional<FuncionarioModel> findAllById(long id);
 
+    Optional<FuncionarioModel> findByNmFuncionario(String nmFuncionario);
+
 
 
 
