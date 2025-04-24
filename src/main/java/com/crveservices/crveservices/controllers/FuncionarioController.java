@@ -1,6 +1,5 @@
 package com.crveservices.crveservices.controllers;
 
-
 import com.crveservices.crveservices.models.FuncionarioModel;
 import com.crveservices.crveservices.dto.FuncionarioRecordDto;
 import com.crveservices.crveservices.repositories.FuncionarioRepository;
@@ -20,7 +19,6 @@ public class FuncionarioController {
 
     @Autowired
     FuncionarioRepository funcionarioRepository;
-
 
     @PostMapping("/login")
     public ResponseEntity<Object> loginFuncionario(@RequestBody Map<String, String> credentials) {
@@ -46,14 +44,18 @@ public class FuncionarioController {
 
         String token = UUID.randomUUID().toString();
 
+        FuncionarioModel funcionarioResponse = new FuncionarioModel();
+        funcionarioResponse.setId(funcionario.get().getId());
+        funcionarioResponse.setNmFuncionario(funcionario.get().getNmFuncionario());
+        funcionarioResponse.setDsEmail(funcionario.get().getDsEmail());
+        funcionarioResponse.setDsSenha(funcionario.get().getDsSenha());
+
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("funcionario", funcionario.get());
+        response.put("funcionario", funcionarioResponse);
 
         return ResponseEntity.ok(response);
     }
-
-
 
     @PostMapping
     public ResponseEntity<FuncionarioModel> saveFuncionario(@RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto) {
@@ -63,39 +65,44 @@ public class FuncionarioController {
     }
 
     @GetMapping
-        public ResponseEntity<List<FuncionarioModel>> getAllFuncionarios() {
-            return ResponseEntity.status(HttpStatus.OK).body(funcionarioRepository.findAll());
-
+    public ResponseEntity<List<FuncionarioModel>> getAllFuncionarios() {
+        List<FuncionarioModel> funcionarios = funcionarioRepository.findAll();
+        // Por segurança, não queremos retornar as senhas dos funcionários
+        funcionarios.forEach(f -> f.setDsSenha(""));
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarios);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getOneFuncionario(@PathVariable(value="id")int id) {
+    public ResponseEntity<Object> getOneFuncionario(@PathVariable(value="id") Long id) {
         Optional<FuncionarioModel> funcionario = funcionarioRepository.findById(id);
         if(funcionario.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Funcionário não encontrado");
         }
-        return ResponseEntity.status(HttpStatus.OK).body(funcionario.get());
+        // Por segurança, não queremos retornar a senha
+        FuncionarioModel funcionarioResponse = funcionario.get();
+        funcionarioResponse.setDsSenha("");
+        return ResponseEntity.status(HttpStatus.OK).body(funcionarioResponse);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateFuncionario(@PathVariable(value = "id") int id,
-            @RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto) {
-        Optional<FuncionarioModel> funcionario0 = funcionarioRepository.findAllById(id);
-        if(funcionario0.isEmpty()) {
+    public ResponseEntity<Object> updateFuncionario(@PathVariable(value = "id") Long id,
+                                                    @RequestBody @Valid FuncionarioRecordDto funcionarioRecordDto) {
+        Optional<FuncionarioModel> funcionarioOpt = funcionarioRepository.findById(id);
+        if(funcionarioOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Funcionário não encontrado");
         }
-        var funcionarioModel = funcionario0.get();
+        var funcionarioModel = funcionarioOpt.get();
         BeanUtils.copyProperties(funcionarioRecordDto, funcionarioModel);
         return ResponseEntity.status(HttpStatus.OK).body(funcionarioRepository.save(funcionarioModel));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteFuncionario(@PathVariable(value = "id")int id) {
-        Optional<FuncionarioModel> funcionario0 = funcionarioRepository.findById(id);
-        if (funcionario0.isEmpty()) {
+    public ResponseEntity<Object> deleteFuncionario(@PathVariable(value = "id") Long id) {
+        Optional<FuncionarioModel> funcionarioOpt = funcionarioRepository.findById(id);
+        if (funcionarioOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Funcionário não encontrado");
         }
-        funcionarioRepository.delete(funcionario0.get());
+        funcionarioRepository.delete(funcionarioOpt.get());
         return ResponseEntity.status(HttpStatus.OK).body("Funcionário excluído com sucesso!");
     }
 }

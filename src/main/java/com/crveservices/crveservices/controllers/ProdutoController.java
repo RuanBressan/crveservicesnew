@@ -52,7 +52,6 @@ public class ProdutoController {
         return ResponseEntity.status(HttpStatus.OK).body(produtoRepository.save(produtoModel));
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteProduto(@PathVariable Long id) {
         Optional<ProdutoModel> produtoOpt = produtoRepository.findById(id);
@@ -62,5 +61,4 @@ public class ProdutoController {
         produtoRepository.delete(produtoOpt.get());
         return ResponseEntity.status(HttpStatus.OK).body("Produto excluído com sucesso!");
     }
-
 }

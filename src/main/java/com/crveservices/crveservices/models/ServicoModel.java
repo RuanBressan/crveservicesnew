@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +21,10 @@ public class ServicoModel implements Serializable {
     private long id;
 
     private String descricao;
+
+    private String status; // "nao-iniciado", "andamento", "concluido"
+
+    private LocalDate dataEntrega;
 
     private double valorMaoDeObra;
 
@@ -33,4 +39,12 @@ public class ServicoModel implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "produto_id")
     )
     private List<ProdutoModel> produtos;
+
+    // Para armazenar a quantidade de cada produto
+    @ElementCollection
+    @CollectionTable(name = "servico_produto_quantidade",
+            joinColumns = @JoinColumn(name = "servico_id"))
+    @MapKeyColumn(name = "produto_id")
+    @Column(name = "quantidade")
+    private Map<Long, Integer> produtosQuantidade;
 }
